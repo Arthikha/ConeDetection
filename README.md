@@ -13,7 +13,7 @@ This repository contains a Python script (`coneDetectCNN.py`) to train a Convolu
 - **PyTorch**: Selected for its flexibility in building custom models.
 
 ### Methodology
-1. **Data Preparation**: Images and YOLO-format labels are loaded from the dataset (given as "formula_student_cones_detection_irt.zip"), resized to 640x640, and normalized. The dataset is processed in batches using a custom `ConeDataset` class.
+1. **Data Preparation**: Images and YOLO-format labels are loaded from the dataset, resized to 640x640, and normalized. The dataset is processed in batches using a custom `ConeDataset` class.
 2. **Model Training**: The CNN is trained for 20 epochs using Adam optimization. Loss combines bounding box regression and classification.
 3. **Evaluation**: mAP@0.5 is calculated using `sklearn.metrics.average_precision_score` to assess detection performance.
 4. **Inference**: The trained model predicts boxes and labels on new images.
@@ -38,7 +38,7 @@ This repository contains a Python script (`coneDetectCNN.py`) to train a Convolu
 ## Usage of code
 
 1. **Setup**:
-   - Download the zip folder and extract the dataset into project folder.
+   - Download the zip folder from the link given in **Source** and extract the dataset into project folder.
    - Install dependencies: `!pip install torch torchvision numpy sklearn`.
 
 2. **Training**:
