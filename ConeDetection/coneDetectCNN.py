@@ -7,6 +7,7 @@ from PIL import Image
 import os
 import numpy as np
 
+from sklearn.metrics import average_precision_score
 
 class ConeDataset(Dataset):
     def __init__(self, root, transform=None):
@@ -124,3 +125,33 @@ for epoch in range(num_epochs):
 
 # Saving Model
 torch.save(model.state_dict(), 'cone_detector.pth')
+
+
+# Evaluation
+model.eval()
+ap_scores = []
+with torch.no_grad():
+    for images, targets in data_loader:
+        images = images.to(device)
+        pred_boxes, pred_scores = model(images)
+        pred_labels = torch.argmax(pred_scores, dim=2).cpu().numpy()
+        # Confidence for positive class
+        pred_conf = torch.softmax(pred_scores, dim=2)[:, :, 1].cpu().numpy()  
+        true_labels = targets['labels'].cpu().numpy()
+        for i in range(len(pred_labels)):
+            ap = average_precision_score((true_labels[i] >= 0).astype(int), pred_conf[i])
+            ap_scores.append(ap)
+print(f"mAP@0.5: {np.mean(ap_scores):.4f}")
+
+
+# Inference
+model.eval()
+img = Image.open('/kaggle/input/formula-student-cones-detection-irt/fsoco_bounding_boxes_train_yolo-gen/images/test_image.jpg').convert('RGB')
+img = transform(img).unsqueeze(0).to(device)
+with torch.no_grad():
+    boxes, scores = model(img)
+    pred_labels = torch.argmax(scores, dim=2)
+    pred_conf = torch.softmax(scores, dim=2)[:, :, 1]
+for i, box in enumerate(boxes[0]):
+    if pred_conf[0][i] > 0.5 and pred_labels[0][i] != -1:
+        print(f"Cone: {dataset.classes[pred_labels[0][i]]}, Box: {box.tolist()}, Conf: {pred_conf[0][i]:.2f}")
